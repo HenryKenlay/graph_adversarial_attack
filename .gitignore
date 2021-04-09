@@ -3,3 +3,5 @@ dropbox
 
 *.pyc
 _ext/
+
+.DS_Store
