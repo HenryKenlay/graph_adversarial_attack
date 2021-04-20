@@ -10,7 +10,8 @@ CXXFLAGS += -Wall -O3 -std=c++11
 LDFLAGS += -lm  -lmkl_rt -ltbb
 
 #CUDA_HOME := /usr/local/cuda
-NVCC := $(CUDA_HOME)/bin/nvcc
+#NVCC := $(CUDA_HOME)/bin/nvcc
+NVCC := /usr/local/cuda-9.1/bin/nvcc
 NVCCFLAGS += --default-stream per-thread
 LDFLAGS += -L$(CUDA_HOME)/lib64 -lcudart -lcublas -lcurand -lcusparse
 
