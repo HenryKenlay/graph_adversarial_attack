@@ -5,12 +5,6 @@ import numpy as np
 import torch
 import networkx as nx
 import random
-from torch.autograd import Variable
-from torch.nn.parameter import Parameter
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-from tqdm import tqdm
 from copy import deepcopy
 import cPickle as cp
 cmd_opt = argparse.ArgumentParser(description='Argparser locally')

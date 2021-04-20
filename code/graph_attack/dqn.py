@@ -4,23 +4,17 @@ import os
 import sys
 import numpy as np
 import torch
-import networkx as nx
 import random
 from torch.autograd import Variable
-from torch.nn.parameter import Parameter
-import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from tqdm import tqdm
 from copy import deepcopy
-
-from q_net import NStepQNet, QNet, greedy_actions
+from q_net import NStepQNet, greedy_actions
 sys.path.append('%s/../common' % os.path.dirname(os.path.realpath(__file__)))
 from cmd_args import cmd_args
-
-from rl_common import GraphEdgeEnv, local_args, load_graphs, test_graphs, load_base_model, attackable, get_supervision
+from rl_common import GraphEdgeEnv, local_args, load_graphs, load_base_model
 from nstep_replay_mem import NstepReplayMem
-
 sys.path.append('%s/../graph_classification' % os.path.dirname(os.path.realpath(__file__)))
 from graph_common import loop_dataset
 
@@ -68,10 +62,12 @@ class Agent(object):
         return actions
 
     def run_simulation(self):
+        # I think this shuffles the batches? pos is batch_id?
         if (self.pos + 1) * cmd_args.batch_size > len(self.sample_idxes):
             self.pos = 0
             random.shuffle(self.sample_idxes)
 
+        # setup env with a batch
         selected_idx = self.sample_idxes[self.pos * cmd_args.batch_size : (self.pos + 1) * cmd_args.batch_size]
         self.pos += 1
         self.env.setup([self.g_list[idx] for idx in selected_idx])
@@ -116,21 +112,27 @@ class Agent(object):
 
     def train(self):
         log_out = open(cmd_args.logfile, 'w', 0)
+
+        # do a burn in phase
         pbar = tqdm(range(self.burn_in), unit='batch')
         for p in pbar:
             self.run_simulation()
+
+        # local_args.num_steps = 100000
         pbar = tqdm(range(local_args.num_steps), unit='steps')
         optimizer = optim.Adam(self.net.parameters(), lr=cmd_args.learning_rate)
         for self.step in pbar:
-
+            # run a simulation and add to self.mem_pool (memory replay buffer)
             self.run_simulation()
 
+            # save/print statistics every 100 steps
             if self.step % 100 == 0:
                 self.take_snapshot()
             if self.step % 100 == 0:
                 r, acc = self.eval()
                 log_out.write('%d %.6f %.6f\n' % (self.step, r, acc))
 
+            # sample from the replay memory?
             cur_time, list_st, list_at, list_rt, list_s_primes, list_term = self.mem_pool.sample(batch_size=cmd_args.batch_size)
 
             list_target = torch.Tensor(list_rt)
@@ -144,7 +146,7 @@ class Agent(object):
                     cleaned_sp.append(list_s_primes[i])
                     nonterms.append(i)
 
-            if len(cleaned_sp):
+            if len(cleaned_sp):  # if len(cleaned_sp) > 0
                 _, _, banned = zip(*cleaned_sp)
                 _, q_t_plus_1, prefix_sum_prime = self.old_net(cur_time + 1, cleaned_sp, None)
                 _, q_rhs = greedy_actions(q_t_plus_1, prefix_sum_prime, banned)
@@ -162,16 +164,21 @@ class Agent(object):
             pbar.set_description('exp: %.5f, loss: %0.5f' % (self.eps, loss) )
 
         log_out.close()
+
+
 if __name__ == '__main__':
+    # set seed
     random.seed(cmd_args.seed)
     np.random.seed(cmd_args.seed)
     torch.manual_seed(cmd_args.seed)
 
+    # load test graphs
     label_map, _, g_list = load_graphs()
     random.shuffle(g_list)
     base_classifier = load_base_model(label_map, g_list)
     env = GraphEdgeEnv(base_classifier, n_edges = 1)
-    
+
+    # split dataset into train and test?
     if cmd_args.frac_meta > 0:
         num_train = int( len(g_list) * (1 - cmd_args.frac_meta) )
         agent = Agent(g_list[:num_train], g_list[num_train:], env)
@@ -187,7 +194,7 @@ if __name__ == '__main__':
         # t = 0
         # while not env.isTerminal():
         #     policy_net = net_list[t]
-        #     t += 1            
+        #     t += 1
         #     batch_graph, picked_nodes = env.getState()
         #     log_probs, prefix_sum = policy_net(batch_graph, picked_nodes)
         #     actions = env.sampleActions(torch.exp(log_probs).data.cpu().numpy(), prefix_sum.data.cpu().numpy(), greedy=True)
