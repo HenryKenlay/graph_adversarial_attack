@@ -3,22 +3,13 @@ from __future__ import print_function
 import os
 import sys
 import numpy as np
-import torch
-import networkx as nx
-import random
-from torch.autograd import Variable
-from torch.nn.parameter import Parameter
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
 from tqdm import tqdm
-
 sys.path.append('%s/../common' % os.path.dirname(os.path.realpath(__file__)))
 from cmd_args import cmd_args
 from graph_embedding import S2VGraph
-
 sys.path.append('%s/../data_generator' % os.path.dirname(os.path.realpath(__file__)))
 from data_util import load_pkl
+
 
 def loop_dataset(g_list, classifier, sample_idxes, optimizer=None, bsize=cmd_args.batch_size):
     total_loss = []
@@ -53,7 +44,6 @@ def loop_dataset(g_list, classifier, sample_idxes, optimizer=None, bsize=cmd_arg
 def load_er_data():
     frac_train = 0.9
     pattern = 'nrange-%d-%d-n_graph-%d-p-%.2f' % (cmd_args.min_n, cmd_args.max_n, cmd_args.n_graphs, cmd_args.er_p)
-
     num_train = int(frac_train * cmd_args.n_graphs)
 
     train_glist = []
@@ -71,3 +61,9 @@ def load_er_data():
 
     return label_map, train_glist, test_glist
 
+if __name__ == '__main__':
+    print()
+    print(cmd_args.min_n, cmd_args.max_n, cmd_args.n_graphs, cmd_args.er_p)
+    print(cmd_args.data_folder)
+    print()
+    load_er_data()

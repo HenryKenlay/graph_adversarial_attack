@@ -1,7 +1,7 @@
 import cPickle as cp
-import networkx as nx
 
 def load_pkl(fname, num_graph):
+    """Load `num_graph` graphs from `fname`."""
     g_list = []
     with open(fname, 'rb') as f:
         for i in range(num_graph):

@@ -2,20 +2,12 @@ from __future__ import print_function
 
 import os
 import sys
-import numpy as np
 import torch
-import random
 from torch.autograd import Variable
-from torch.nn.parameter import Parameter
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
-from tqdm import tqdm
-import networkx as nx
-
 from cmd_args import cmd_args
 from graph_embedding import EmbedMeanField, EmbedLoopyBP
-
 sys.path.append('%s/../../pytorch_structure2vec/s2v_lib' % os.path.dirname(os.path.realpath(__file__)))
 from pytorch_util import weights_init
 
@@ -73,6 +65,7 @@ class MLPClassifier(nn.Module):
             return logits
 
 class GraphClassifier(nn.Module):
+
     def __init__(self, label_map, **kwargs):
         super(GraphClassifier, self).__init__()
         self.label_map = label_map

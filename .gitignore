@@ -5,3 +5,7 @@ dropbox
 _ext/
 
 .DS_Store
+
+pytorch_structure2vec/
+
+.idea*
