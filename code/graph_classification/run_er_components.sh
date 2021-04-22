@@ -11,6 +11,7 @@ max_lv=5
 
 save_fold=nodes-${min_n}-${max_n}-p-${p}-c-${min_c}-${max_c}-lv-${max_lv}
 output_root=$HOME/scratch/results/graph_classification/components/$save_fold
+saved_model=$output_root/epoch-best
 
 if [ ! -e $output_root ];
 then
@@ -25,6 +26,7 @@ python er_components.py \
     -max_lv $max_lv \
     -min_c $min_c \
     -max_c $max_c \
+    -saved_model $saved_model \
     -n_graphs 5000 \
     -er_p $p \
     $@
