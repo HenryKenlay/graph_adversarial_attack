@@ -1,16 +1,15 @@
-import os
 import sys
 import cPickle as cp
 import random
 import numpy as np
 import networkx as nx
-import time
 from tqdm import tqdm
 
 
 def get_component():
+    """Generate a connected ER component with min_n <= n <= max_n."""
     cur_n = np.random.randint(max_n - min_n + 1) + min_n
-    g = nx.erdos_renyi_graph(n = cur_n, p = p)
+    g = nx.erdos_renyi_graph(n=cur_n, p=p)
 
     comps = [c for c in nx.connected_component_subgraphs(g)]
     random.shuffle(comps)
