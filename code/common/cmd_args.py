@@ -66,7 +66,8 @@ cmd_opt.add_argument('-del_rate', type=float, default=0, help='rate of deleting 
 
 cmd_args, _ = cmd_opt.parse_known_args()
 
-print(cmd_args)
+for arg in vars(cmd_args):
+    print arg, getattr(cmd_args, arg)
 
 def build_kwargs(keys, arg_dict):
     st = ''
