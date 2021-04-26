@@ -4,6 +4,16 @@ import random
 import numpy as np
 import networkx as nx
 from tqdm import tqdm
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--save_dir', help='Save directory.')
+parser.add_argument('--max_n', type=int, help='Upper bound on graph size.')
+parser.add_argument('--min_n', type=int,  help='Lower bound on graph size.')
+parser.add_argument('--num_graph', type=int, help='Number of graphs to generate')
+parser.add_argument('--p', type=float, help='Connectivity parameter.')
+parser.add_argument('--n_comp', type=int, help='Number of connected components.')
+args = parser.parse_args()
 
 
 def get_component():
@@ -20,41 +30,20 @@ def get_component():
     assert nx.is_connected(g)
     return g
 
+
 if __name__ == '__main__':
-    save_dir = None
-    max_n = None
-    min_n = None
-    num_graph = None
-    p = None
-    n_comp = None
-    for i in range(1, len(sys.argv), 2):
-        if sys.argv[i] == '-save_dir':
-            save_dir = sys.argv[i + 1]
-        if sys.argv[i] == '-max_n':
-            max_n = int(sys.argv[i + 1])
-        if sys.argv[i] == '-min_n':
-            min_n = int(sys.argv[i + 1])
-        if sys.argv[i] == '-num_graph':
-            num_graph = int(sys.argv[i + 1])
-        if sys.argv[i] == '-p':
-            p = float(sys.argv[i + 1])
-        if sys.argv[i] == '-n_comp':
-            n_comp = int(sys.argv[i + 1])
+    max_n = args.max_n
+    min_n = args.min_n
+    p = args.p
+    n_comp = args.n_comp
 
-    assert save_dir is not None
-    assert max_n is not None
-    assert min_n is not None
-    assert num_graph is not None
-    assert p is not None
-    assert n_comp is not None
-
-    fout_name = '%s/ncomp-%d-nrange-%d-%d-n_graph-%d-p-%.2f.pkl' % (save_dir, n_comp, min_n, max_n, num_graph, p)
+    fout_name = '%s/ncomp-%d-nrange-%d-%d-n_graph-%d-p-%.2f.pkl' % (args.save_dir, n_comp, min_n, max_n, args.num_graph, p)
     print('Final Output: ' + fout_name)
     print("Generating graphs...")
     min_n = min_n // n_comp
     max_n = max_n // n_comp
 
-    for i in tqdm(range(num_graph)):
+    for i in tqdm(range(args.num_graph)):
 
         for j in range(n_comp):
             g = get_component()
